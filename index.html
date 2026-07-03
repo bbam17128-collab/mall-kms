@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mall Knowledge Management System</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="app" class="app-shell">
+      <section id="authView" class="auth-view">
+        <div class="auth-panel">
+          <div class="brand-lockup">
+            <div class="brand-mark" aria-hidden="true">M</div>
+            <div>
+              <p class="eyebrow">Mall Operations</p>
+              <h1>Knowledge Management System</h1>
+            </div>
+          </div>
+
+          <form id="loginForm" class="auth-form">
+            <div class="form-heading">
+              <h2>Secure Sign In</h2>
+              <p>Authorized access for mall management teams.</p>
+            </div>
+            <label>
+              Username
+              <input id="usernameInput" name="username" autocomplete="username" required />
+            </label>
+            <label>
+              Password
+              <input id="passwordInput" name="password" type="password" autocomplete="current-password" required />
+            </label>
+            <p id="loginError" class="form-error" role="alert"></p>
+            <button class="primary-button" type="submit">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Zm4 5.73V18h-2v-2.27a2 2 0 1 1 2 0Z"/></svg>
+              </span>
+              Continue
+            </button>
+          </form>
+
+          <form id="otpForm" class="auth-form hidden">
+            <div class="form-heading">
+              <h2>One-Time Password</h2>
+              <p>Enter the verification code issued for this session.</p>
+            </div>
+            <label>
+              OTP Code
+              <input id="otpInput" name="otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required />
+            </label>
+            <div class="otp-ticket">
+              <span>OTP Email</span>
+              <strong id="otpDeliveryMessage">Sent to authorized email</strong>
+            </div>
+            <p id="otpError" class="form-error" role="alert"></p>
+            <div class="button-row">
+              <button id="backToLoginButton" class="secondary-button" type="button">Back</button>
+              <button class="primary-button" type="submit">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="m9 16.2-3.5-3.5L4 14.2l5 5L20.5 7.7 19 6.2 9 16.2Z"/></svg>
+                </span>
+                Verify
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <aside class="auth-visual" aria-label="Mall operations overview">
+          <img src="./assets/mall-directory.svg" alt="Monochrome mall directory and atrium overview" />
+          <div class="visual-stat">
+            <span>Active SOPs</span>
+            <strong>128</strong>
+          </div>
+          <div class="visual-stat">
+            <span>Tenant Guides</span>
+            <strong>46</strong>
+          </div>
+          <div class="visual-stat">
+            <span>Emergency Updates</span>
+            <strong>12</strong>
+          </div>
+        </aside>
+      </section>
+
+      <section id="dashboardView" class="dashboard hidden">
+        <header class="topbar">
+          <div class="topbar-title">
+            <div class="brand-mark small" aria-hidden="true">M</div>
+            <div>
+              <p class="eyebrow">Mall Knowledge Hub</p>
+              <h1>Operations Library</h1>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <span id="signedInAs" class="signed-in"></span>
+            <button id="logoutButton" class="secondary-button compact" type="button" title="Sign out">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5v-2H5V5h5V3Zm8.6 8-3.3-3.3 1.4-1.4L22.4 12l-5.7 5.7-1.4-1.4 3.3-3.3H9v-2h9.6Z"/></svg>
+              </span>
+              Sign Out
+            </button>
+          </div>
+        </header>
+
+        <section class="metric-strip" aria-label="Knowledge base metrics">
+          <article>
+            <span>Total Articles</span>
+            <strong id="totalMetric">0</strong>
+          </article>
+          <article>
+            <span>Published</span>
+            <strong id="publishedMetric">0</strong>
+          </article>
+          <article>
+            <span>Under Review</span>
+            <strong id="reviewMetric">0</strong>
+          </article>
+          <article>
+            <span>Critical</span>
+            <strong id="criticalMetric">0</strong>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <aside class="sidebar" aria-label="Knowledge controls">
+            <div class="control-group">
+              <label>
+                Search
+                <div class="input-with-icon">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 0 1 5.17 10.44l4.45 4.44-1.42 1.42-4.44-4.45A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>
+                  </span>
+                  <input id="searchInput" placeholder="Search articles" />
+                </div>
+              </label>
+              <label>
+                Category
+                <select id="categoryFilter">
+                  <option value="All">All categories</option>
+                </select>
+              </label>
+              <label>
+                Status
+                <select id="statusFilter">
+                  <option value="All">All statuses</option>
+                  <option>Published</option>
+                  <option>Review</option>
+                  <option>Draft</option>
+                </select>
+              </label>
+            </div>
+            <button id="newArticleButton" class="primary-button" type="button">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+              </span>
+              New Article
+            </button>
+          </aside>
+
+          <section class="content-grid">
+            <div class="table-panel">
+              <div class="section-heading">
+                <h2>Knowledge Articles</h2>
+                <span id="resultCount">0 records</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Files</th>
+                      <th>Owner</th>
+                      <th>Updated</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="articleTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <aside id="detailPanel" class="detail-panel" aria-live="polite">
+              <div class="empty-state">
+                <span class="empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5V3Zm9 1.5V8h3.5L14 4.5ZM7 10v2h10v-2H7Zm0 4v2h10v-2H7Zm0 4h6v-2H7v2Z"/></svg>
+                </span>
+                <h2>Select an article</h2>
+                <p>Article details will appear here.</p>
+              </div>
+            </aside>
+          </section>
+        </section>
+
+        <section class="assistant-panel" aria-label="Knowledge assistant">
+          <div class="assistant-head">
+            <div>
+              <p class="eyebrow">AI Assistant</p>
+              <h2>Mall Knowledge Assistant</h2>
+            </div>
+            <div class="assistant-actions">
+              <span class="pill light">Knowledge Base Mode</span>
+              <button id="clearAssistantHistoryButton" class="secondary-button compact" type="button">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.7 12H7.7L7 9Zm3 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z"/></svg>
+                </span>
+                Clear
+              </button>
+            </div>
+          </div>
+          <div id="assistantMessages" class="assistant-messages"></div>
+          <form id="assistantForm" class="assistant-form">
+            <label class="sr-only" for="assistantInput">Ask the assistant</label>
+            <input id="assistantInput" placeholder="Ask about procedures, security, tenants, facilities, or attachments" />
+            <button class="primary-button compact" type="submit">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 11.5 21 3l-4.8 18-3.7-7.1L5.3 18 3 11.5Zm4.1.5.7 2 6.5-3.6 3.1-3.8L7.1 12Z"/></svg>
+              </span>
+              Ask
+            </button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="articleDialog" class="article-dialog">
+      <form id="articleForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Knowledge Record</p>
+            <h2 id="dialogTitle">New Article</h2>
+          </div>
+          <button id="closeDialogButton" class="icon-button" type="button" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+
+        <input id="articleIdInput" type="hidden" />
+        <div class="form-grid">
+          <label class="span-2">
+            Title
+            <input id="titleInput" required maxlength="90" />
+          </label>
+          <label>
+            Category
+            <select id="articleCategoryInput" required>
+              <option>Emergency Response</option>
+              <option>Tenant Operations</option>
+              <option>Facilities</option>
+              <option>Security</option>
+              <option>Customer Experience</option>
+              <option>Retail Marketing</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select id="articleStatusInput" required>
+              <option>Published</option>
+              <option>Review</option>
+              <option>Draft</option>
+            </select>
+          </label>
+          <label>
+            Priority
+            <select id="priorityInput" required>
+              <option>Standard</option>
+              <option>Critical</option>
+              <option>High</option>
+              <option>Low</option>
+            </select>
+          </label>
+          <label>
+            Audience
+            <input id="audienceInput" required placeholder="Operations, Security, Tenants" />
+          </label>
+          <label>
+            Owner
+            <input id="ownerInput" required placeholder="Department or role" />
+          </label>
+          <label>
+            Tags
+            <input id="tagsInput" placeholder="Comma-separated tags" />
+          </label>
+          <label class="span-2">
+            Summary
+            <textarea id="summaryInput" required rows="3"></textarea>
+          </label>
+          <label class="span-2">
+            Procedure
+            <textarea id="bodyInput" required rows="6"></textarea>
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          <button id="deleteFromDialogButton" class="danger-button hidden" type="button">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.7 12H7.7L7 9Zm3 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z"/></svg>
+            </span>
+            Delete
+          </button>
+          <div class="right-actions">
+            <button id="cancelDialogButton" class="secondary-button" type="button">Cancel</button>
+            <button class="primary-button" type="submit">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5V3Zm2 2v14h10V7.8L14.2 5H7Zm2 2h5v2H9V7Zm0 4h6v2H9v-2Zm0 4h6v2H9v-2Z"/></svg>
+              </span>
+              Save Article
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="attachmentDialog" class="attachment-dialog">
+      <form id="attachmentForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Article Files</p>
+            <h2 id="attachmentDialogTitle">Manage Attachments</h2>
+          </div>
+          <button id="closeAttachmentDialogButton" class="icon-button" type="button" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+
+        <div class="attachment-layout">
+          <section class="attachment-list-panel">
+            <div class="section-heading compact-heading">
+              <h3>Current Attachments</h3>
+              <span id="attachmentCount">0 files</span>
+            </div>
+            <div id="attachmentList" class="attachment-list"></div>
+          </section>
+
+          <section class="attachment-editor">
+            <input id="attachmentIdInput" type="hidden" />
+            <label>
+              Display Name
+              <input id="attachmentNameInput" placeholder="Example: Fire drill floor plan" />
+            </label>
+            <label>
+              File
+              <input
+                id="attachmentFileInput"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.doc,.docx,.ppt,.pptx,.xls,.xlsx,application/pdf,image/jpeg,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              />
+            </label>
+            <p class="file-note">Allowed: PDF, JPG/JPEG, Word, PowerPoint, Excel. Maximum 1.5 MB per file, 5 files per article.</p>
+            <p id="attachmentError" class="form-error" role="alert"></p>
+            <div class="attachment-editor-actions">
+              <button id="resetAttachmentFormButton" class="secondary-button" type="button">Clear</button>
+              <button class="primary-button" type="submit">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+                </span>
+                Save File
+              </button>
+            </div>
+          </section>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="emailDialog" class="email-dialog">
+      <form id="emailForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Share Article</p>
+            <h2 id="emailDialogTitle">Send Article by Email</h2>
+          </div>
+          <button id="closeEmailDialogButton" class="icon-button" type="button" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <label class="span-2">
+            Recipient Email
+            <input id="emailRecipientInput" type="email" multiple required placeholder="recipient@example.com" />
+          </label>
+          <label class="span-2">
+            Subject
+            <input id="emailSubjectInput" required />
+          </label>
+          <label class="span-2">
+            Optional Note
+            <textarea id="emailNoteInput" rows="3" placeholder="Add a short note for the recipient"></textarea>
+          </label>
+          <div class="span-2">
+            <p class="eyebrow">Email Preview</p>
+            <pre id="emailPreview" class="email-preview"></pre>
+          </div>
+        </div>
+
+        <div class="dialog-actions">
+          <span class="file-note">Attachments are listed in the email body. Add original files manually in your email app if needed.</span>
+          <div class="right-actions">
+            <button id="cancelEmailButton" class="secondary-button" type="button">Cancel</button>
+            <button class="primary-button" type="submit">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3V5Zm2 3.2V17h14V8.2l-7 4.7-7-4.7ZM6.3 7l5.7 3.8L17.7 7H6.3Z"/></svg>
+              </span>
+              Open Email
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="deleteDialog" class="confirm-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Confirm Delete</p>
+            <h2>Delete Article</h2>
+          </div>
+          <button id="closeDeleteDialogButton" class="icon-button" type="button" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+        <p id="deleteDialogText" class="confirm-copy"></p>
+        <div class="dialog-actions">
+          <span></span>
+          <div class="right-actions">
+            <button id="cancelDeleteButton" class="secondary-button" type="button">Cancel</button>
+            <button id="confirmDeleteButton" class="danger-button" type="button">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.7 12H7.7L7 9Zm3 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z"/></svg>
+              </span>
+              Delete
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img">
+  <rect width="1200" height="750" fill="#f8f8f8"/>
+  <rect x="70" y="70" width="1060" height="610" rx="16" fill="#fff" stroke="#141414" stroke-width="4"/>
+  <rect x="115" y="118" width="970" height="514" rx="8" fill="#eeeeee" stroke="#cfcfcf" stroke-width="2"/>
+  <path d="M225 185h750v120H225z" fill="#fff" stroke="#1d1d1d" stroke-width="3"/>
+  <path d="M225 445h750v120H225z" fill="#fff" stroke="#1d1d1d" stroke-width="3"/>
+  <path d="M225 305h160v140H225zM815 305h160v140H815z" fill="#fff" stroke="#1d1d1d" stroke-width="3"/>
+  <path d="M385 305h430v140H385z" fill="#d9d9d9" stroke="#1d1d1d" stroke-width="3"/>
+  <path d="M445 338h310v74H445z" fill="#fff" stroke="#1d1d1d" stroke-width="3"/>
+  <path d="M465 375h270" stroke="#777" stroke-width="8" stroke-linecap="round"/>
+  <path d="M225 245h750M295 185v120M365 185v120M435 185v120M505 185v120M575 185v120M645 185v120M715 185v120M785 185v120M855 185v120M925 185v120" stroke="#bdbdbd" stroke-width="3"/>
+  <path d="M225 505h750M295 445v120M365 445v120M435 445v120M505 445v120M575 445v120M645 445v120M715 445v120M785 445v120M855 445v120M925 445v120" stroke="#bdbdbd" stroke-width="3"/>
+  <circle cx="330" cy="375" r="28" fill="#111"/>
+  <circle cx="870" cy="375" r="28" fill="#111"/>
+  <path d="M320 375h20M330 365v20M860 375h20M870 365v20" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <rect x="515" y="600" width="170" height="42" rx="21" fill="#111"/>
+  <text x="600" y="628" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#fff">LEVEL 02</text>
+  <rect x="880" y="104" width="170" height="42" rx="6" fill="#111"/>
+  <text x="965" y="132" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#fff">DIRECTORY</text>
+  <g fill="#111" opacity=".9">
+    <circle cx="170" cy="180" r="13"/>
+    <circle cx="170" cy="235" r="13"/>
+    <circle cx="170" cy="290" r="13"/>
+    <circle cx="170" cy="345" r="13"/>
+  </g>
+  <g stroke="#111" stroke-width="8" stroke-linecap="round">
+    <path d="M515 150h170"/>
+    <path d="M515 585h170"/>
+    <path d="M150 530h70"/>
+    <path d="M980 530h70"/>
+  </g>
+</svg>
