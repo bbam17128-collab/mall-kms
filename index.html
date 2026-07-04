@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mall Knowledge Hub System</title>
+    <title>Mall Knowledge Management System</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -14,7 +14,7 @@
             <div class="brand-mark" aria-hidden="true">M</div>
             <div>
               <p class="eyebrow">Mall Operations</p>
-              <h1>Knowledge Hub System</h1>
+              <h1>Knowledge Management System</h1>
             </div>
           </div>
 
@@ -120,6 +120,63 @@
             <span>Critical</span>
             <strong id="criticalMetric">0</strong>
           </article>
+        </section>
+
+        <section id="adminReportPanel" class="report-panel hidden" aria-label="Admin reporting dashboard">
+          <div class="report-head">
+            <div>
+              <p class="eyebrow">Admin Dashboard</p>
+              <h2>Usage Reports</h2>
+            </div>
+            <button id="clearUsageButton" class="secondary-button compact" type="button">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.7 12H7.7L7 9Zm3 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z"/></svg>
+              </span>
+              Clear Report
+            </button>
+          </div>
+
+          <div class="report-grid">
+            <article class="report-card">
+              <span>Today</span>
+              <strong id="dailyUsageMetric">0</strong>
+              <small>total actions</small>
+            </article>
+            <article class="report-card">
+              <span>This Week</span>
+              <strong id="weeklyUsageMetric">0</strong>
+              <small>total actions</small>
+            </article>
+            <article class="report-card">
+              <span>This Month</span>
+              <strong id="monthlyUsageMetric">0</strong>
+              <small>total actions</small>
+            </article>
+            <article class="report-card">
+              <span>Searches</span>
+              <strong id="searchUsageMetric">0</strong>
+              <small>this month</small>
+            </article>
+          </div>
+
+          <div class="report-detail-grid">
+            <article class="report-block">
+              <h3>Most Searched Article</h3>
+              <p id="topSearchedArticle">No search data yet.</p>
+            </article>
+            <article class="report-block">
+              <h3>Most Viewed Article</h3>
+              <p id="topViewedArticle">No view data yet.</p>
+            </article>
+            <article class="report-block">
+              <h3>Top Search Terms</h3>
+              <ul id="topSearchTerms"></ul>
+            </article>
+            <article class="report-block">
+              <h3>Usage Breakdown</h3>
+              <ul id="usageBreakdown"></ul>
+            </article>
+          </div>
         </section>
 
         <section class="workspace">
