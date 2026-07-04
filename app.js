@@ -1,5 +1,6 @@
 const STORAGE_KEY = "mall-kms-articles-v1";
 const SESSION_KEY = "mall-kms-session-v1";
+const USAGE_KEY = "mall-kms-usage-v1";
 const MAX_ATTACHMENT_BYTES = 1.5 * 1024 * 1024;
 const MAX_ATTACHMENTS_PER_ARTICLE = 5;
 const OTP_RECIPIENT_EMAIL = "antonio.kimarvee@gmail.com";
@@ -134,6 +135,16 @@ const els = {
   publishedMetric: document.querySelector("#publishedMetric"),
   reviewMetric: document.querySelector("#reviewMetric"),
   criticalMetric: document.querySelector("#criticalMetric"),
+  adminReportPanel: document.querySelector("#adminReportPanel"),
+  dailyUsageMetric: document.querySelector("#dailyUsageMetric"),
+  weeklyUsageMetric: document.querySelector("#weeklyUsageMetric"),
+  monthlyUsageMetric: document.querySelector("#monthlyUsageMetric"),
+  searchUsageMetric: document.querySelector("#searchUsageMetric"),
+  topSearchedArticle: document.querySelector("#topSearchedArticle"),
+  topViewedArticle: document.querySelector("#topViewedArticle"),
+  topSearchTerms: document.querySelector("#topSearchTerms"),
+  usageBreakdown: document.querySelector("#usageBreakdown"),
+  clearUsageButton: document.querySelector("#clearUsageButton"),
   searchInput: document.querySelector("#searchInput"),
   categoryFilter: document.querySelector("#categoryFilter"),
   statusFilter: document.querySelector("#statusFilter"),
@@ -197,6 +208,7 @@ let currentAccount = null;
 let pendingDeleteId = "";
 let attachmentArticleId = "";
 let emailArticleId = "";
+let searchUsageTimer = 0;
 const assistantHistory = [];
 
 function loadArticles() {
@@ -243,6 +255,152 @@ function saveArticles() {
   } catch {
     showToast("Storage limit reached. Remove files or use smaller attachments.");
     return false;
+  }
+}
+
+function loadUsageEvents() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(USAGE_KEY));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveUsageEvents(events) {
+  localStorage.setItem(USAGE_KEY, JSON.stringify(events.slice(-2500)));
+}
+
+function trackUsage(type, data = {}) {
+  const event = {
+    type,
+    at: new Date().toISOString(),
+    username: currentAccount?.username || "anonymous",
+    role: currentAccount?.role || "unknown",
+    ...data,
+  };
+  const events = loadUsageEvents();
+  events.push(event);
+  saveUsageEvents(events);
+  renderAdminDashboard();
+}
+
+function scheduleSearchUsage() {
+  window.clearTimeout(searchUsageTimer);
+  searchUsageTimer = window.setTimeout(() => {
+    const query = els.searchInput.value.trim();
+    if (query.length < 3) return;
+    const topMatch = getFilteredArticles()[0];
+    trackUsage("search", {
+      query,
+      articleId: topMatch?.id || "",
+      articleTitle: topMatch?.title || "No match",
+    });
+  }, 700);
+}
+
+function renderAdminDashboard() {
+  if (!els.adminReportPanel) return;
+  els.adminReportPanel.classList.toggle("hidden", !isAdmin());
+  if (!isAdmin()) return;
+
+  const events = loadUsageEvents();
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const weekStart = startOfWeek(now);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthlyEvents = events.filter((event) => new Date(event.at) >= monthStart);
+
+  els.dailyUsageMetric.textContent = countSince(events, todayStart);
+  els.weeklyUsageMetric.textContent = countSince(events, weekStart);
+  els.monthlyUsageMetric.textContent = monthlyEvents.length;
+  els.searchUsageMetric.textContent = monthlyEvents.filter((event) => event.type === "search").length;
+  els.topSearchedArticle.textContent = topLabel(monthlyEvents, "search", "articleTitle", "No search data yet.");
+  els.topViewedArticle.textContent = topViewedArticleLabel(monthlyEvents);
+  renderUsageList(els.topSearchTerms, topEntries(monthlyEvents, "search", "query", 4), "No search terms yet.");
+  renderUsageList(els.usageBreakdown, breakdownEntries(monthlyEvents), "No usage data yet.");
+}
+
+function countSince(events, startDate) {
+  return events.filter((event) => new Date(event.at) >= startDate).length;
+}
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function startOfWeek(date) {
+  const start = startOfDay(date);
+  const day = start.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  start.setDate(start.getDate() + mondayOffset);
+  return start;
+}
+
+function topEntries(events, type, field, limit = 5) {
+  const counts = events
+    .filter((event) => event.type === type && event[field])
+    .reduce((map, event) => {
+      const key = String(event[field]).trim();
+      map.set(key, (map.get(key) || 0) + 1);
+      return map;
+    }, new Map());
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([label, count]) => ({ label, count }));
+}
+
+function topLabel(events, type, field, emptyText) {
+  const [top] = topEntries(events, type, field, 1);
+  return top ? `${top.label} (${top.count})` : emptyText;
+}
+
+function topViewedArticleLabel(events) {
+  const [top] = topEntries(events, "article_view", "articleId", 1);
+  if (!top) return "No view data yet.";
+  const article = articles.find((item) => item.id === top.label);
+  return `${article?.title || top.label} (${top.count})`;
+}
+
+function breakdownEntries(events) {
+  const labels = {
+    login: "Logins",
+    search: "Searches",
+    article_view: "Article views",
+    assistant_query: "Assistant questions",
+    article_create: "Articles created",
+    article_update: "Articles updated",
+    article_delete: "Articles deleted",
+    attachment_add: "Attachments added",
+    attachment_update: "Attachments updated",
+    attachment_delete: "Attachments deleted",
+    email_draft: "Email drafts",
+  };
+  const counts = events.reduce((map, event) => {
+    map.set(event.type, (map.get(event.type) || 0) + 1);
+    return map;
+  }, new Map());
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([type, count]) => ({ label: labels[type] || type, count }));
+}
+
+function renderUsageList(element, entries, emptyText) {
+  element.innerHTML = "";
+  if (!entries.length) {
+    const item = document.createElement("li");
+    item.textContent = emptyText;
+    element.append(item);
+    return;
+  }
+
+  for (const entry of entries) {
+    const item = document.createElement("li");
+    item.textContent = `${entry.label} (${entry.count})`;
+    element.append(item);
   }
 }
 
@@ -404,6 +562,7 @@ function render() {
   renderMetrics();
   renderTable(filtered);
   renderDetail();
+  renderAdminDashboard();
 }
 
 function renderMetrics() {
@@ -619,9 +778,11 @@ function saveArticleFromForm() {
 
   if (existingIndex >= 0) {
     articles[existingIndex] = article;
+    trackUsage("article_update", { articleId: article.id, articleTitle: article.title });
     showToast("Article updated");
   } else {
     articles.unshift(article);
+    trackUsage("article_create", { articleId: article.id, articleTitle: article.title });
     showToast("Article created");
   }
 
@@ -651,9 +812,11 @@ function closeDeleteDialog() {
 function confirmDeleteArticle() {
   if (!isAdmin()) return;
   if (!pendingDeleteId) return;
+  const article = articles.find((item) => item.id === pendingDeleteId);
   articles = articles.filter((item) => item.id !== pendingDeleteId);
   selectedArticleId = articles[0]?.id ?? null;
   saveArticles();
+  if (article) trackUsage("article_delete", { articleId: article.id, articleTitle: article.title });
   renderCategories();
   render();
   closeDeleteDialog();
@@ -777,9 +940,11 @@ async function saveAttachmentFromForm() {
 
   if (existingIndex >= 0) {
     article.attachments[existingIndex] = attachment;
+    trackUsage("attachment_update", { articleId: article.id, articleTitle: article.title });
     showToast("Attachment updated");
   } else {
     article.attachments.unshift(attachment);
+    trackUsage("attachment_add", { articleId: article.id, articleTitle: article.title });
     showToast("Attachment added");
   }
 
@@ -810,6 +975,7 @@ function deleteAttachment(attachmentId) {
   article.attachments = article.attachments.filter((attachment) => attachment.id !== attachmentId);
   article.updatedAt = new Date().toISOString().slice(0, 10);
   saveArticles();
+  trackUsage("attachment_delete", { articleId: article.id, articleTitle: article.title });
   resetAttachmentForm();
   render();
   renderAttachmentManager();
@@ -962,6 +1128,7 @@ function sendArticleEmail() {
   const href = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   window.location.href = href;
+  trackUsage("email_draft", { articleId: article.id, articleTitle: article.title });
   closeEmailDialog();
   showToast("Email draft opened");
 }
@@ -1137,6 +1304,7 @@ els.otpForm.addEventListener("submit", (event) => {
 
   setSession(pendingAccount);
   showDashboard(pendingAccount);
+  trackUsage("login");
   showToast("Access verified");
 });
 
@@ -1147,7 +1315,10 @@ els.logoutButton.addEventListener("click", () => {
   showToast("Signed out");
 });
 
-els.searchInput.addEventListener("input", render);
+els.searchInput.addEventListener("input", () => {
+  render();
+  scheduleSearchUsage();
+});
 els.categoryFilter.addEventListener("change", render);
 els.statusFilter.addEventListener("change", render);
 els.newArticleButton.addEventListener("click", () => openArticleDialog());
@@ -1158,6 +1329,7 @@ els.articleTableBody.addEventListener("click", (event) => {
   const { action, id } = button.dataset;
   if (action === "select") {
     selectedArticleId = id;
+    trackUsage("article_view", { articleId: id, articleTitle: articles.find((article) => article.id === id)?.title || "" });
     render();
   }
   if (action === "edit") openArticleDialog(id);
@@ -1192,6 +1364,7 @@ els.assistantForm.addEventListener("submit", (event) => {
 
   assistantHistory.push({ role: "user", content: question });
   assistantHistory.push({ role: "assistant", ...answerAssistantQuestion(question) });
+  trackUsage("assistant_query", { query: question });
   els.assistantInput.value = "";
   renderAssistantMessages();
 });
@@ -1200,6 +1373,13 @@ els.clearAssistantHistoryButton.addEventListener("click", () => {
   resetAssistantHistory();
   els.assistantInput.value = "";
   showToast("Assistant history cleared");
+});
+
+els.clearUsageButton.addEventListener("click", () => {
+  if (!isAdmin()) return;
+  localStorage.removeItem(USAGE_KEY);
+  renderAdminDashboard();
+  showToast("Usage report cleared");
 });
 
 els.emailForm.addEventListener("submit", (event) => {
